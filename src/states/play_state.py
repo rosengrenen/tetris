@@ -65,7 +65,6 @@ class PlayState(State):
         self.drop = False
 
     def input(self, engine, events):
-        self.reset_input()
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_a:
@@ -85,9 +84,10 @@ class PlayState(State):
         if self.left:
             if self.grid.can_move(self.shape, -1, 0):
                 self.shape.position.x -= 1
-        if self.right:
+        elif self.right:
             if self.grid.can_move(self.shape, 1, 0):
                 self.shape.position.x += 1
+
         if self.rotate_right:
             self.shape.rotate_right()
             if self.grid.can_move(self.shape, 0, 0):
@@ -122,7 +122,7 @@ class PlayState(State):
                 self.score += 1
 
         self.time_since_last_drop += delta_time
-        drops_per_second = 4 + self.level
+        drops_per_second = 3 + self.level
         drop_interval = 1000 / drops_per_second
         increased_drop_speed_multiplier = 6
         increased_drop_interval = drop_interval / increased_drop_speed_multiplier
@@ -145,7 +145,17 @@ class PlayState(State):
                 del self.next_shape_indices[0]
                 self.__generate_next_shapes()
 
-        cleared_rows = self.grid.clear_rows()
+        rows_cleared = self.grid.clear_rows()
+        if rows_cleared == 1:
+            self.score += 40
+        elif rows_cleared == 2:
+            self.score += 100
+        elif rows_cleared == 3:
+            self.score += 300
+        elif rows_cleared == 4:
+            self.score += 1200
+
+        self.reset_input()
 
     def render(self, engine, surface):
         white = Colour(255, 255, 255)

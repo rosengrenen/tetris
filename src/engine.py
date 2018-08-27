@@ -7,6 +7,7 @@ class Engine:
         self.running = False
         self.states = [state]
         pygame.init()
+        pygame.key.set_repeat(100, 40)
 
     def start(self):
         if self.running:
@@ -19,7 +20,7 @@ class Engine:
         frames_per_second = 60
 
         time_since_last_update = 0
-        updates_per_second = 120
+        updates_per_second = 60
 
         current_time = int(round(time.time() * 1000))
 
