@@ -42,6 +42,8 @@ class PlayState(State):
         self.next_shapes = []
         self.next_shape_indices = []
 
+        self.saved_shape = None
+
         self.shape = None
         self.__generate_next_shapes()
         self.shape = self.next_shapes[0]
@@ -55,6 +57,7 @@ class PlayState(State):
         self.rotate_right = False
         self.rotate_left = False
         self.drop = False
+        self.save = False
 
     def reset_input(self):
         self.right = False
@@ -63,6 +66,7 @@ class PlayState(State):
         self.rotate_right = False
         self.rotate_left = False
         self.drop = False
+        self.save = False
 
     def input(self, engine, events):
         for event in events:
@@ -79,8 +83,65 @@ class PlayState(State):
                     self.rotate_left = True
                 if event.key == pygame.K_SPACE:
                     self.drop = True
+                if event.key == pygame.K_c:
+                    self.save = True
 
     def update(self, engine, delta_time):
+        if self.save:
+            if self.saved_shape:
+                position = copy.deepcopy(self.shape.position)
+                tmp = self.saved_shape
+                self.saved_shape = self.shape
+                self.shape = tmp
+                self.shape.position = position
+                if self.grid.can_move(self.shape, 0, 0):
+                    pass
+                elif self.grid.can_move(self.shape, 1, 0):
+                    self.shape.position.x += 1
+                elif self.grid.can_move(self.shape, -1, 0):
+                    self.shape.position.x -= 1
+                elif self.grid.can_move(self.shape, 2, 0):
+                    self.shape.position.x += 2
+                elif self.grid.can_move(self.shape, -2, 0):
+                    self.shape.position.x -= 2
+                else:
+                    self.shape = self.saved_shape
+                    self.saved_shape = tmp
+                    self.shape.position = position
+            else:
+                position = copy.deepcopy(self.shape.position)
+                self.saved_shape = self.shape
+                self.shape = copy.deepcopy(self.next_shapes[0])
+                self.shape.position = position
+
+                flag = False
+                if self.grid.can_move(self.shape, 0, 0):
+                    pass
+                    flag = True
+                elif self.grid.can_move(self.shape, 1, 0):
+                    self.shape.position.x += 1
+                    flag = True
+                elif self.grid.can_move(self.shape, -1, 0):
+                    self.shape.position.x -= 1
+                    flag = True
+                elif self.grid.can_move(self.shape, 2, 0):
+                    self.shape.position.x += 2
+                    flag = True
+                elif self.grid.can_move(self.shape, -2, 0):
+                    self.shape.position.x -= 2
+                    flag = True
+                else:
+                    self.shape = self.saved_shape
+                    self.saved_shape = None
+
+                if flag:
+                    del self.next_shapes[0]
+                    del self.next_shape_indices[0]
+                    self.__generate_next_shapes()
+
+
+
+
         if self.left:
             if self.grid.can_move(self.shape, -1, 0):
                 self.shape.position.x -= 1
@@ -200,12 +261,9 @@ class PlayState(State):
         offset = 1
         for shape in self.next_shapes:
             x_min = 100
-            x_max = 0
             y_min = 100
             y_max = 0
             for node in shape.nodes:
-                if node.x > x_max:
-                    x_max = node.x
                 if node.x < x_min:
                     x_min = node.x
                 if node.y > y_max:
@@ -223,3 +281,25 @@ class PlayState(State):
                     (node.y + offset - y_min) * self.grid_size + 1,
                     self.grid_size - 2, self.grid_size - 2))
             offset += height + 2
+
+        if self.saved_shape:
+            x_min = 100
+            y_min = 100
+            y_max = 0
+            for node in self.saved_shape.nodes:
+                if node.x < x_min:
+                    x_min = node.x
+                if node.y > y_max:
+                    y_max = node.y
+                if node.y < y_min:
+                    y_min = node.y
+            height = y_max - y_min
+            for node in self.saved_shape.nodes:
+
+                pygame.draw.rect(surface, self.saved_shape.colour.darken(20),
+                                 ((self.grid.width + node.x + 1 - x_min) * self.grid_size,
+                                  (self.grid.height + node.y - y_min - 2) * self.grid_size, self.grid_size, self.grid_size))
+                pygame.draw.rect(surface, self.saved_shape.colour.darken(20),
+                                 ((self.grid.width + node.x + 1 - x_min) * self.grid_size + 1,
+                                  (self.grid.height + node.y - y_min - 2) * self.grid_size + 1, self.grid_size - 2,
+                                  self.grid_size - 2))
