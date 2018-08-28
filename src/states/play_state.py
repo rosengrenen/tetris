@@ -1,3 +1,5 @@
+from src.grid import Grid
+from src.shape import Shape
 from src.states.state import State
 import pygame
 
@@ -10,6 +12,9 @@ class PlayState(State):
         self.rotate_right = False
         self.rotate_left = False
         self.drop = False
+
+        self.grid = Grid(10, 20, 20)
+        self.shape = Shape()
 
     def reset_input(self):
         self.right = False
@@ -36,14 +41,12 @@ class PlayState(State):
                 if event.key == pygame.K_SPACE:
                     self.drop = True
 
-
-
     def update(self, engine, delta_time):
-
-
+        if self.left:
+            shape.move()
 
     def render(self, engine, surface):
-        pygame.draw.rect(surface, (255, 0, 0), (0, 0, 20, 20))
+        pygame.draw.rect(surface, (255, 0, 0), (20, 60, 20, 20))
         for y in range(20):
             for x in range(10):
                 if self.grid[x][y]:
