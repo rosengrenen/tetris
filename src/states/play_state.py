@@ -3,6 +3,8 @@ from src.shape import Shape
 from src.states.state import State
 import pygame
 
+from src.utils import Point
+
 
 class PlayState(State):
     def __init__(self):
@@ -14,7 +16,7 @@ class PlayState(State):
         self.drop = False
 
         self.grid = Grid(10, 20, 20)
-        self.shape = Shape()
+        self.shape = Shape(self.grid)
 
     def reset_input(self):
         self.right = False
@@ -42,12 +44,23 @@ class PlayState(State):
                     self.drop = True
 
     def update(self, engine, delta_time):
-        if self.left:
-            shape.move()
+        pass
 
     def render(self, engine, surface):
-        pygame.draw.rect(surface, (255, 0, 0), (20, 60, 20, 20))
-        for y in range(20):
-            for x in range(10):
-                if self.grid[x][y]:
-                    pass
+        # for y in range(20):
+        #     for x in range(10):
+        #         if self.grid[x][y]:
+        #             pass
+
+        for cell in self.shape.nodes:
+            pygame.draw.rect(
+                surface,
+                self.shape.color,
+                (
+                    self.shape.get_node_coordinate(cell).x,
+                    self.shape.get_node_coordinate(cell).y,
+                    20,
+                    20
+                ),
+                0)
+

@@ -21,7 +21,8 @@ class Engine:
                     self.running = False
 
             delta_time = 16
-            self.states[-1].update(self, delta_time, events)
+            self.states[-1].input(self, events)
+            self.states[-1].update(self, delta_time)
             screen.fill((0, 0, 0))
             self.states[-1].render(self, screen)
             pygame.display.flip()
