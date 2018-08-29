@@ -51,6 +51,8 @@ class PlayState(State):
         del self.next_shape_indices[0]
         self.__generate_next_shapes()
 
+        self.saved_this_round = False
+
         self.right = False
         self.left = False
         self.down = False
@@ -87,60 +89,29 @@ class PlayState(State):
                     self.save = True
 
     def update(self, engine, delta_time):
-        if self.save:
+        if self.save and not self.saved_this_round:
+            self.saved_this_round = True
             if self.saved_shape:
-                position = copy.deepcopy(self.shape.position)
-                tmp = self.saved_shape
-                self.saved_shape = self.shape
-                self.shape = tmp
-                self.shape.position = position
-                if self.grid.can_move(self.shape, 0, 0):
+                tmp = self.shape
+                self.shape = self.saved_shape
+                self.saved_shape = tmp
+                self.shape.position = Point(5, 0)
+
+                if not self.grid.can_move(self.shape, 0, 0):
+                    # Game over
                     pass
-                elif self.grid.can_move(self.shape, 1, 0):
-                    self.shape.position.x += 1
-                elif self.grid.can_move(self.shape, -1, 0):
-                    self.shape.position.x -= 1
-                elif self.grid.can_move(self.shape, 2, 0):
-                    self.shape.position.x += 2
-                elif self.grid.can_move(self.shape, -2, 0):
-                    self.shape.position.x -= 2
-                else:
-                    self.shape = self.saved_shape
-                    self.saved_shape = tmp
-                    self.shape.position = position
             else:
-                position = copy.deepcopy(self.shape.position)
                 self.saved_shape = self.shape
                 self.shape = copy.deepcopy(self.next_shapes[0])
-                self.shape.position = position
+                self.shape.position = Point(5, 0)
 
-                flag = False
-                if self.grid.can_move(self.shape, 0, 0):
+                if not self.grid.can_move(self.shape, 0, 0):
+                    # Game over
                     pass
-                    flag = True
-                elif self.grid.can_move(self.shape, 1, 0):
-                    self.shape.position.x += 1
-                    flag = True
-                elif self.grid.can_move(self.shape, -1, 0):
-                    self.shape.position.x -= 1
-                    flag = True
-                elif self.grid.can_move(self.shape, 2, 0):
-                    self.shape.position.x += 2
-                    flag = True
-                elif self.grid.can_move(self.shape, -2, 0):
-                    self.shape.position.x -= 2
-                    flag = True
                 else:
-                    self.shape = self.saved_shape
-                    self.saved_shape = None
-
-                if flag:
                     del self.next_shapes[0]
                     del self.next_shape_indices[0]
                     self.__generate_next_shapes()
-
-
-
 
         if self.left:
             if self.grid.can_move(self.shape, -1, 0):
@@ -200,6 +171,7 @@ class PlayState(State):
                     self.score += 1
                 self.shape.position.y += 1
             else:
+                self.saved_this_round = False
                 self.grid.add_shape(self.shape)
                 self.shape = self.next_shapes[0]
                 del self.next_shapes[0]
@@ -295,10 +267,10 @@ class PlayState(State):
                     y_min = node.y
             height = y_max - y_min
             for node in self.saved_shape.nodes:
-
                 pygame.draw.rect(surface, self.saved_shape.colour.darken(20),
                                  ((self.grid.width + node.x + 1 - x_min) * self.grid_size,
-                                  (self.grid.height + node.y - y_min - 2) * self.grid_size, self.grid_size, self.grid_size))
+                                  (self.grid.height + node.y - y_min - 2) * self.grid_size, self.grid_size,
+                                  self.grid_size))
                 pygame.draw.rect(surface, self.saved_shape.colour.darken(20),
                                  ((self.grid.width + node.x + 1 - x_min) * self.grid_size + 1,
                                   (self.grid.height + node.y - y_min - 2) * self.grid_size + 1, self.grid_size - 2,
