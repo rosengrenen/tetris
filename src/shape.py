@@ -29,7 +29,7 @@ class Shape:
     @staticmethod
     def load_shape():
         while True:
-            random_shape = random.randint(0, len(ShapeDefinitions.Shapes))
+            random_shape = random.randint(0, len(ShapeDefinitions.Shapes) - 1)
             if random_shape == Shape.last_shape:
                 continue
             Shape.last_shape = random_shape
