@@ -1,10 +1,12 @@
 import pygame
+import time
 
 
 class Engine:
     def __init__(self, state):
         self.running = False
         self.states = [state]
+        self.last_time = time.time()
         pygame.init()
 
     def start(self):
@@ -15,6 +17,9 @@ class Engine:
         self.running = True
 
         while self.running and len(self.states):
+            print((time.time() - self.last_time) * 1000)
+            self.last_time = time.time()
+
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
