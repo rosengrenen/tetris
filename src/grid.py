@@ -8,10 +8,20 @@ class Grid:
     def get_coordinate(self, value):
         return value * self.size
 
-    def lock_shape(self):
-        pass
+    def lock_shape(self, shape):
+        for node in shape.nodes:
+            self.grid[shape.x + node.x][shape.y + node.y] = shape.color
+
 
     def can_move(self, shape, x_offset, y_offset):
-        pass
+        for node in shape.nodes:
+            node_offset_x = shape.x + node.x + x_offset
+            node_offset_y = shape.y + node.y + y_offset
+            if node_offset_x > self.width or node_offset_x < 0:
+                return False
+            if node_offset_y > self.height:
+                return False
+            if self.grid[node_offset_x][node_offset_y]:
+                return False
 
-
+        return True;
