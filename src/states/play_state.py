@@ -44,7 +44,10 @@ class PlayState(State):
                     self.drop = True
 
     def update(self, engine, delta_time):
-        pass
+        if self.drop:
+            self.shape.color = self.shape.load_shape()[0]
+            self.shape.nodes = self.shape.load_shape()[1]
+            self.drop = False
 
     def render(self, engine, surface):
         # for y in range(20):
